@@ -1,1 +1,0 @@
-# Multilevel-Object-Closure-Detection-By-Superpixels
