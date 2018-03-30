@@ -1,0 +1,19 @@
+% LogisticLearn - train a binary logistic classifier
+%
+% Arguments:
+%   features - NxD matrix. Each row is a feature vector. There are N
+%   training samples.
+%   labels   - Nx1 vector of 0,1 ground truth labels
+%   C        - the importance of sparseness of parameters. Higher value
+%   give sparser parameters.
+%
+% Returns:
+%   beta     - Dx1 vector of parameters of a logistic probability distribution
+%   P(X=1) = 1 / (1 + exp(-beta' * feature))
+%
+function beta = LogisticLearn(features, labels, C)
+    options = optimset('GradObj','on', 'LargeScale', 'off', 'MaxIter', 300, ...
+        'Display', 'iter', 'DerivativeCheck', 'off');
+    params = fminunc(@minFunc, params_init, options, nets, labels, features, edge_features, D, K);
+
+    beta = fminunc(@LogisticLogLikelihood, init_beta, options, features, labels, C);

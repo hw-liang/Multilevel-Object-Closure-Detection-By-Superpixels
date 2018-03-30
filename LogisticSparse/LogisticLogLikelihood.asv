@@ -1,0 +1,10 @@
+function [L, grad_L] = LogisticLogLikelihood(beta, features, labels, C)
+
+    logistic_arg = features * beta';
+    L = sum(logistic_arg .* (labels - 1) + log(1+exp(-logistic_arg))) + ...
+        C*sum(abs(beta));
+    
+    if (nargout > 1)
+        logistic_prob = 1 ./ (1 + exp(-logistic_arg));
+        
+    end

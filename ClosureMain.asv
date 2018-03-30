@@ -1,0 +1,91 @@
+% Main function for finding closure in images:
+%
+% Arguments:
+%   img_filename - filename of the image to process (any format readable by
+%   Matlab
+%   output_dir   - the output directory for the solutions
+%   num_sups     - number of superpi
+function ClosureMain(img_filename, output_dir, num_sups, num_solutions, edge_thresh)
+
+    img = im2double(imread(img_filename));
+
+    % Compute Pb
+    disp('Computing Pb');
+    pb_file = [img_filename(1:end-4),'_pb.mat'];
+    if (~exist(pb_file, 'file'))
+        [pb, theta, tmap] = pbCGTG(img);
+        save(pb_file, 'pb', 'theta', 'tmap');
+    else
+        load(pb_file);
+    end
+
+%     disp('Computing gPb');
+%     cur_dir = pwd;
+%     cd globalPb;
+%     gpb_file = [img_filename(1:end-4),'_gpb.mat'];
+%     rsz = 0.5;
+%     if (~exist(gpb_file, 'file'))
+%         [gPb_thin, gPb, maxo] = globalPb(img_filename, 'temp.bmp', rsz);
+%         save(gpb_file, 'gPb_thin', 'gPb', 'maxo');
+%     end
+%     cd(cur_dir);
+%     if (exist(gpb_file, 'file'))
+%         load(gpb_file);
+%         pb = gPb_thin;
+%     end
+
+    disp('Postprocessing Pb results');
+    image_data_file = [img_filename(1:end-4),'_image_data.mat'];
+    if (~exist(image_data_file, 'file'))
+        image_data = PrecomputeImageData(img, pb, theta, tmap);
+        save(image_data_file, 'image_data');
+    else
+        load(image_data_file);
+    end
+
+    disp('Computing Superpixels');
+    superpixels_file = [img_filename(1:end-4),'_num_sups_',num2str(num_sups),'.seg'];
+    if (~exist(superpixels_file, 'file'))
+        sup_image = Superpixels_Ncuts_Pb(img, num_sups, image_data_file);
+        writeSeg(sup_image, superpixels_file);
+    else
+        sup_image = readSeg(superpixels_file);
+    end
+    sup_image = CleanSupImage(sup_image);
+
+    disp('Looking for closures using parametric maxflow');
+    [X, Xs, cost, sup_image] = SuperpixelClosureGrouping(img_filename, sup_image, image_data, 'area', num_solutions, [], edge_thresh);
+    
+    disp('Postprocessing the results');
+    Xs = ChooseLargestSupComponent(sup_image, Xs);
+
+    % Remove duplicates
+    s = 1;
+    while (s < size(Xs,2))
+        duplicates = all(Xs(:,(s+1):end) == repmat(Xs(:,s), [1, size(Xs,2)-s]), 1);
+        Xs(:, [false(1,s), duplicates]) = [];
+        s = s + 1;
+    end
+
+    % Remove all-1 and all-0 solutions
+    n = max(sup_image(:));
+    all_1 = sum(Xs, 1) == n;
+    Xs(:, all_1) = [];
+
+    all_0 = sum(Xs, 1) == 0;
+    Xs(:, all_0) = [];
+
+    disp('Saving solutions');
+    % Save the figure images into a files
+    results_img_file = [output_dir,'/',img_filename(1:end-4),'_multiplesolutions.jpg'];
+
+    s = min([size(Xs,2), num_solutions]);
+    results_img = DrawSuperpixelsAreaIterationsSingleFigure(img, sup_image, Xs(:,1:s));
+    imwrite(results_img, results_img_file, 'jpg');
+
+    for sol = 1:s
+        results_img_file = [output_dir,'/',img_filename(1:end-4),'_solution_',num2strPad(sol,3),'.jpg'];
+        fg = SupValueImage_MEX(sup_image, double(Xs(:,sol)));
+
+        imwrite(fg, results_img_file, 'jpg');
+    end
