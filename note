@@ -6,4 +6,3 @@ Compared with the original source, we made some changes below:
 2. At the stage of computing superpixels:
     For "ncuts" method, we changed the ./Multilevel-Object-Closure-Detection-By-Superpixels/Ncut_9/eigs_new.m with the eigs.m from Matlab_2014.
 3. We changed /Multilevel-Object-Closure-Detection-By-Superpixels/ChooseLargestSupComponent.m to solve some bugs in special cases when we choose all the superpixels.
-4. Han cloned the project.
