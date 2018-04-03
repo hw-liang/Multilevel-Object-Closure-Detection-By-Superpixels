@@ -9,7 +9,7 @@
 %   edge_threshold  - Pb edge threshold (smaller values result in more
 %                     solutions)
 %   sup_method      - The method used to generate superpixels.
-%                     Valid values: 'ncuts', 'turbo' (default)
+%                     Valid values: 'ncuts', 'turbo', 'slic'
 %   Example: ClosureMain(img_filename, '.', 100, 10, 0.05, 'turbo');
 %            This would open the image in img_file, extract 100 superpixels
 %            using the Turbopixels method, use an edge threshold of 0.05,
@@ -98,9 +98,9 @@ function ClosureMain(img_filename, output_dir, num_sups, num_solutions, ...
     disp('Looking for closures using parametric maxflow');
     % input: file name, superpixel labels, pb edge data, denominator for
     % the cost function, the max number of solutions, the selected 
-    % superpixels (limit the range?) edge threshold for support.
-    % output: X might be the first solution's pixels, Xs might be the
-    % pixles for all possible solutions, cost is the result of the minimum
+    % superpixels, edge threshold for support.
+    % output: X is the first selection of superpixels, Xs contains a total
+    % of num_solutions of selections of superpixels, cost is the result of the minimum
     % cost function, the sup-image is the label image for superpixels.
     [X, Xs, cost, sup_image] = SuperpixelClosureGrouping(img_filename, sup_image, ...
         image_data, 'area', num_solutions, [], edge_thresh);
@@ -128,9 +128,11 @@ function ClosureMain(img_filename, output_dir, num_sups, num_solutions, ...
     % Save the figure images into a files
     [pathstr, name, ext] = fileparts(img_filename);
     results_img_file = [output_dir,'/',core_name,'/',name,'_multiplesolutions.jpg'];  % the file name to hold multiple solutions
-
-    s = min([size(Xs,2), num_solutions]);  % the number of solutions might be smaller than the num_solutions
-    results_img = DrawSuperpixelsAreaIterationsSingleFigure(img, sup_image, Xs(:,1:s));  % get multiple solutions into an 3D array
+    % the number of solutions might be smaller than the num_solutions
+    s = min([size(Xs,2), num_solutions]);  
+    % get multiple solutions into an 3D array,results_img shows all the
+    % results in one picture.
+    results_img = DrawSuperpixelsAreaIterationsSingleFigure(img, sup_image, Xs(:,1:s));  
     imwrite(results_img, results_img_file, 'jpg');  % write the image to the file
 
     for sol = 1:s
