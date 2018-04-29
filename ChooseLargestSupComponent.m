@@ -13,8 +13,16 @@ function Xs = ChooseLargestSupComponent(sup_image, Xs)
         % Find the region with the largest area
         [area, max_idx] = max([region_stats(:).Area]);
         new_fg_img = zeros(size(fg));
-        
         new_fg_img(region_stats(max_idx).PixelIdxList) = 1;
-        Xs(:,s) = Mean_Superpixels_Image_MEX(sup_image, new_fg_img) > 0.5;
+        si = size(Mean_Superpixels_Image_MEX(sup_image, new_fg_img) > 0.5);
+        if (size(Xs, 1) ~= si(1)) 
+            temp = Mean_Superpixels_Image_MEX(sup_image, new_fg_img) > 0.5;
+            temp(end) = [];
+            Xs(:,s) = temp;
+        else
+            temp = Mean_Superpixels_Image_MEX(sup_image, new_fg_img) > 0.5;
+            Xs(:,s) = temp;
+        end
+        
         
     end

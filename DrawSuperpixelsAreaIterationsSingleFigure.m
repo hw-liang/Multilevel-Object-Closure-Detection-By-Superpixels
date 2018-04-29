@@ -25,8 +25,10 @@ function disp_img_total = DrawSuperpixelsAreaIterationsSingleFigure(img, ...
         if (nargout == 0)  % if the number of output is 0
             subplot('Position',[col/num_cols (num_rows-row-1)/num_rows 1/num_cols 1/num_rows]);
             iptsetpref('ImshowBorder', 'tight');
-            DrawSuperpixelsFigure(img, sup_image, Xs(:,i));
+            DrawSuperpixelsFigure(img, sup_image, Xs(:,i));  % draw the grouping of superpixels on the foreground
         else
+            % img: original image; sup_image: labels for superpixels; Xs:
+            % binary labels for superpixels for multiple solutions.
             disp_img = DrawSuperpixelsFigure(img, sup_image, Xs(:,i));  % draw the superpixel groups
             start_row = M*row+1;
             start_col = N*col+1;
@@ -34,8 +36,7 @@ function disp_img_total = DrawSuperpixelsAreaIterationsSingleFigure(img, ...
             % the output of this function
             disp_img_total(start_row:(start_row+M-1),start_col:(start_col+N-1),:) = im2double(disp_img);
         end
-        
-        
+
         if (number_on && nargout == 0)
             title(num2str(i));
         end

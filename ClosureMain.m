@@ -105,96 +105,41 @@ function ClosureMain(img_filename, output_dir, num_sups, num_solutions, ...
         sup_image = readSeg(superpixels_file);
     end
     sup_image = CleanSupImage(sup_image);  % fill the empty pixel locations
-
+    original_mask = zeros(size(sup_image));  % The original mask is all 0s, and the dimension is the same as the sub_image.
+    counter = 0;
+    extract_objects(img_filename, output_dir, img, num_sups, sup_image, image_data, original_mask, edge_thresh, counter);
     
-    %% Parametric Maxflow
-    disp('Looking for closures using parametric maxflow');
-    % input: file name, superpixel labels, pb edge data, denominator for
-    % the cost function, the max number of solutions, the selected 
-    % superpixels (limit the range?) edge threshold for support.
-    % output: X is the first solution's selected pixels, Xs might be the
-    % selected pixles for all possible solutions, cost is the result of the minimum
-    % cost function, the sup-image is the label image for superpixels.
-    
-    [X2, Xs2, cost, sup_image] = SuperpixelClosureGrouping(img_filename, sup_image, ...
-        image_data, 'area', num_solutions, [], edge_thresh);  % call the superpixel grouping on the ground level
-    
-    % test code:
-    unselected_sup = find(X2);  % find the selected superpixels
-    for i = 1:numel(unselected_sup)
-        % for each element index in the selected_sup
-        sup_image(sup_image == unselected_sup(i)) = 0;  % make them 0.
-    end
-    
-    [X, Xs, cost, sup_image] = SuperpixelClosureGrouping(img_filename, sup_image, ...
-        image_data, 'area', num_solutions, [], edge_thresh);  % call the superpixel grouping on the ground level
-    
-    disp('Postprocessing the results');
-    Xs = ChooseLargestSupComponent(sup_image, Xs);  % choose a group of large number of superpixels
-
-    % Remove duplicates
-    s = 1;
-    while (s < size(Xs,2))
-        duplicates = all(Xs(:,(s+1):end) == repmat(Xs(:,s), [1, size(Xs,2)-s]), 1);
-        Xs(:, [false(1,s), duplicates]) = [];
-        s = s + 1;
-    end
-
-    % Remove all-1 and all-0 solutions
-    n = max(sup_image(:));
-    all_1 = sum(Xs, 1) == n;
-    Xs(:, all_1) = [];
-
-    all_0 = sum(Xs, 1) == 0;
-    Xs(:, all_0) = [];
-
-    %% Save the solutions out to files
-    disp('Saving solutions');
-    % Save the figure images into a files
-    [pathstr, name, ext] = fileparts(img_filename);
-    results_img_file = [output_dir,'/',core_name,'/',name,'_multiplesolutions.jpg'];  % the file name to hold multiple solutions
-
-    s = min([size(Xs,2), num_solutions]);  % the number of solutions might be smaller than the num_solutions
-    results_img = DrawSuperpixelsAreaIterationsSingleFigure(img, sup_image, Xs(:,1:s));  % get multiple solutions into an 3D array
-    imwrite(results_img, results_img_file, 'jpg');  % write the image to the file
-
-    % Crop the image here, use the first solution as the target
-    % Use the original image, superpixel image, and the binary labels
-%     [m,n,c] = size(img);
-%     h_min = intmax; h_max = intmin; v_min = intmax; v_max = intmin;
-%     X_labels = Xs(:,1);
-%     X_labels = X;
-%     for i = 1:m
-%         for j = 1:n
-%             label = sup_image(i,j);
-%             if (label > 0)
-%                if X_labels(label) == 1
-%                     % in the group of selected superpixels
-%                     if (j < h_min)
-%                         h_min = j;
-%                     end
-%                     if (j > h_max)
-%                         h_max = j;
-%                     end
-%                     if (i < v_min)
-%                         v_min = i;
-%                     end
-%                     if (i > v_max)
-%                         v_max = i;
-%                     end
-%                end
-%             end
-%         end
+    % The following is the way to find the objects at the same level.
+%     original_mask = zeros(size(sup_image));  % The original mask is all 0s, and the dimension is the same as the sub_image.
+%     result_masks = find_objects_same_level(img_filename, img, sup_image, image_data, original_mask, edge_thresh);
+%     %% Save the solutions out to files
+%     disp('Saving solutions');
+%     % Save the figure images into a files
+%     [pathstr, name, ext] = fileparts(img_filename);
+%     [m,n] = size(result_masks);
+%     [a,b] = size(sup_image);
+%     s = n/b;  % The number of found objects.
+%     Xs = zeros(max(sup_image(:)), s); % to hold all objects' labels for the original sup_image.
+%     results_img_file2 = [output_dir,'/',core_name,'/',name,'_multiplesolutions.jpg'];  % the file name to hold multiple solutions
+% 
+%     for sol = 1:s
+%         % For each solution, write the foreground (white and black) to an
+%         % image.
+%         results_img_file = [output_dir,'/',core_name,'/',name,'_solution_',num2strPad(sol,3),'.jpg'];
+%         fg = result_masks(:, (sol-1)*b + 1 : sol*b);
+%         imwrite(fg, results_img_file, 'jpg');  % the white and black images
+%         object_sup = sup_image .* fg;
+%         temp_holder = unique(object_sup);
+%         temp_h = Xs(:, sol);
+%         temp_holder = temp_holder(temp_holder ~= 0);
+%         temp_h(temp_holder) = 1;
+%         Xs(:, sol) = temp_h;
 %     end
-%     v_min, h_min, v_max, h_max
-%     test_crop = imcrop(img, [h_min v_min (h_max-h_min) (v_max-v_min)]); 
-%     imshow(test_crop);
-%     imwrite(test_crop, 'test.jpg');
-    for sol = 1:s
-        % For each solution, write the foreground (white and black) to an
-        % image.
-        results_img_file = [output_dir,'/',core_name,'/',name,'_solution_',num2strPad(sol,3),'.jpg'];
-        fg = SupValueImage_MEX(sup_image, double(Xs(:,sol)));  % get the foreground image
-        imwrite(fg, results_img_file, 'jpg');  % the white and black images
-    end
-%     ClosureMain('test.jpg', '.', 100, 10, 0.05, 'slic');
+%     Xs_size = size(Xs);
+%     if (Xs_size(2) ~= 0)
+%         results_img = DrawSuperpixelsAreaIterationsSingleFigure(img, sup_image, Xs(:,1:s));  % get multiple solutions into an 3D array
+%         imwrite(results_img, results_img_file2, 'jpg');  % write the image to the file
+%     else
+%         disp('No result.');
+%     end
+    
