@@ -1,8 +1,13 @@
 General info:
 -------------
 
-This code computes multiple closure hypotheses in an image as described in :
-"Optimal Contour Closure by Superpixel Grouping", Alex Levinshtein, Cristian Sminchisescu, Sven Dickinson. ECCV 2010.
+This is the code for the CSC2523 course project, by Han and Hanwen, winter 2018 at University of Toronto. We intend to use the work of “Optimal Contour Closure by Superpixel Grouping", Alex Levinshtein, Cristian Sminchisescu, Sven Dickinson. ECCV 2010” as the starting point to design an recursive algorithm to detect all possible objects and their closures for an image.
+
+The recursive part of code still has bugs, which might be fixed in the future. The tree structure was also not completed yet.
+
+We offer sincere thanks for Professor Sven Dickinson and Alex Levinshtein for their guidance and help in this project!
+
+The code was based on most from the original code from “Optimal Contour Closure by Superpixel Grouping", Alex Levinshtein, Cristian Sminchisescu, Sven Dickinson. ECCV 2010”. We added some changes and the recursive object-closure detection part.
 
 When using this code please reference the above paper.
 
@@ -13,14 +18,17 @@ Our implementation included code from other sources:
 4) Parametric Maxflow from Vladimir Kolmogorov et al
 5) Matlab helper functions from Peter Kovesi
 6) MatlabBGL library for graph operations from David Gleich
+7) SLIC super pixels from VLFeat
 
 We acknowledge the authors of the above software.
 Our code, as well as the code included above is covered under GPL (see LICENSE)
 
+Before running the program on MATLAB, you will need to have the proper C++ compilers, MATLAB software, and VLFeat open source package installed.
 
 Quick startup guide:
 --------------------
 
+1) Start the VLFeat library.
 1) Run the command 'DefinePath' from the Closure directory in Matlab
 2) Run make.m (if you haven't done so before on this system)
 3) Use the function 'ClosureMain' to compute closure (see header for usage)
