@@ -7,19 +7,25 @@
 % but it will just have 0 and 1 as elements to indicate which area is
 % valid, which area is not valid.
 function [result_masks] = find_objects_same_level(img_filename, output_dir, img, threshold, sup_image, image_data, ...
-    mask, edge_thresh, counter)
+    mask, edge_thresh, counter,counter2,counter3)   % Mask the area of insterest as 0
     disp(['find_objects_same_level is called with the counter', num2str(counter)]);
     objects_same_level = [];
     [selected_labels, a_mask] = find_an_object(img_filename, img, sup_image, image_data, mask, edge_thresh);
-    object_size = sum(a_mask(:));
-    total_size = size(sup_image(:));
+                                % Mask the area of insterest as 0
+    objects_same_level = [objects_same_level, a_mask];
+    object_size = sum(~mask(:)) - sum(a_mask(:));
+
+    if((object_size ==0 || sum(a_mask(:))==0))
+        result_masks = [];
+        return    
+    end
     
     while (object_size > threshold)  % the condition can be proportional to the size of the image (e.g. (total_size/100)) or a fixed threshold
-        objects_same_level = [objects_same_level, a_mask];
         mask = mask | a_mask;  % may not be true
         [selected_labels, a_mask] = find_an_object(img_filename, img, sup_image, image_data, mask, edge_thresh);
         object_size = sum(a_mask(:));
-    end
+        objects_same_level = [objects_same_level, a_mask];
+    end   
     result_masks = objects_same_level;
     
     % warp things here
@@ -29,9 +35,9 @@ function [result_masks] = find_objects_same_level(img_filename, output_dir, img,
     [pathstr, name, ext] = fileparts(img_filename);
     [m,n] = size(result_masks);
     [a,b] = size(sup_image);
-    s = n/b;  % The number of found objects.
+    s = n/b  % The number of found objects.
     Xs = zeros(max(sup_image(:)), s); % to hold all objects' labels for the original sup_image.
-    results_img_file2 = [output_dir,'/',core_name,'/',name,'_', num2str(counter), '_multiplesolutions.jpg'];  % the file name to hold multiple solutions
+    results_img_file2 = [output_dir,'/',core_name,'/',name,'_', num2str(counter),'_',num2str(counter3),'_',num2str(counter2), '_multiplesolutions.jpg'];  % the file name to hold multiple solutions
 
     for sol = 1:s
         % For each solution, write the foreground (white and black) to an

@@ -1,30 +1,24 @@
 % Main function for finding closure in images:
-%
-% Arguments:
+function ClosureMain(img_filename, output_dir, num_sups, edge_thresh, sup_algorithm)
+%%  Arguments:
 %   img_filename    - filename of the image to process (any format readable
 %                     by Matlab
 %   output_dir      - the output directory for the solutions
 %   num_sups        - number of superpixels to extract
-%   num_solutions   - number of closure solutions
 %   edge_threshold  - Pb edge threshold (smaller values result in more
 %                     solutions)
 %   sup_method      - The method used to generate superpixels.
 %                     Valid values: 'ncuts', 'turbo' (default)
-%   Example: ClosureMain(img_filename, '.', 100, 10, 0.05, 'turbo');
+%   Example: ClosureMain(img_filename, '.', 100, 0.05, 'ncuts');
 %            This would open the image in img_file, extract 100 superpixels
 %            using the Turbopixels method, use an edge threshold of 0.05,
 %            generate at most 10 solutions and will store them in the
 %            current directory.
-%
-function ClosureMain(img_filename, output_dir, num_sups, num_solutions, ...
-    edge_thresh, sup_algorithm)
-    
     %% setup files
     core_name = img_filename(1:end-4);
     if (~exist(core_name,'dir'))
         mkdir(core_name)
     end
-    
     use_gpb = false;  % if use the global pb
     if (ispc)  % if it is a PC
         % Global Pb is not supported on windows
@@ -32,13 +26,12 @@ function ClosureMain(img_filename, output_dir, num_sups, num_solutions, ...
     end
     
     img = im2double(imread(img_filename));  % read a image and convert it to double precision
-    img_copy = img;  % get a copy of the original image
     % Add base case here
     [m,n] = size(img);
-    if (m*n) < 1000
+    if ((m*n) < 1000)
         % If the total size of the image is less than 1000 pixels, return.
         disp('The input image is too small. The function does not continue.');
-       return; 
+        return; 
     end
     
     %% Compute Pb
@@ -78,7 +71,6 @@ function ClosureMain(img_filename, output_dir, num_sups, num_solutions, ...
         load(image_data_file);
     end
     
-    
     %% Compute superpixels
     disp('Computing Superpixels');
     superpixels_file = [core_name,'/',img_filename(1:end-4),'_num_sups_',num2str(num_sups),'.seg'];
@@ -90,12 +82,6 @@ function ClosureMain(img_filename, output_dir, num_sups, num_solutions, ...
                 sup_image = Superpixels_Ncuts_Pb(img, num_sups, image_data_file);
             case 'turbo'                
                 sup_image = superpixels_pb(img, num_sups, [], [], [], image_data.pb);
-            case 'slic'
-                sup_image = vl_slic(single(img), num_solutions, edge_thresh) + 1;
-                % The returning value is a UINT32 array containing the
-                % superpixel identifier (label) for each image pixel.
-                % It is a matrix for labelling each pixel in the original
-                % image.
             otherwise
                 error('Unsupported superpixel method');
         end
@@ -105,41 +91,10 @@ function ClosureMain(img_filename, output_dir, num_sups, num_solutions, ...
         sup_image = readSeg(superpixels_file);
     end
     sup_image = CleanSupImage(sup_image);  % fill the empty pixel locations
+    % Add mask
     original_mask = zeros(size(sup_image));  % The original mask is all 0s, and the dimension is the same as the sub_image.
     counter = 0;
-    extract_objects(img_filename, output_dir, img, num_sups, sup_image, image_data, original_mask, edge_thresh, counter);
-    
-    % The following is the way to find the objects at the same level.
-%     original_mask = zeros(size(sup_image));  % The original mask is all 0s, and the dimension is the same as the sub_image.
-%     result_masks = find_objects_same_level(img_filename, img, sup_image, image_data, original_mask, edge_thresh);
-%     %% Save the solutions out to files
-%     disp('Saving solutions');
-%     % Save the figure images into a files
-%     [pathstr, name, ext] = fileparts(img_filename);
-%     [m,n] = size(result_masks);
-%     [a,b] = size(sup_image);
-%     s = n/b;  % The number of found objects.
-%     Xs = zeros(max(sup_image(:)), s); % to hold all objects' labels for the original sup_image.
-%     results_img_file2 = [output_dir,'/',core_name,'/',name,'_multiplesolutions.jpg'];  % the file name to hold multiple solutions
-% 
-%     for sol = 1:s
-%         % For each solution, write the foreground (white and black) to an
-%         % image.
-%         results_img_file = [output_dir,'/',core_name,'/',name,'_solution_',num2strPad(sol,3),'.jpg'];
-%         fg = result_masks(:, (sol-1)*b + 1 : sol*b);
-%         imwrite(fg, results_img_file, 'jpg');  % the white and black images
-%         object_sup = sup_image .* fg;
-%         temp_holder = unique(object_sup);
-%         temp_h = Xs(:, sol);
-%         temp_holder = temp_holder(temp_holder ~= 0);
-%         temp_h(temp_holder) = 1;
-%         Xs(:, sol) = temp_h;
-%     end
-%     Xs_size = size(Xs);
-%     if (Xs_size(2) ~= 0)
-%         results_img = DrawSuperpixelsAreaIterationsSingleFigure(img, sup_image, Xs(:,1:s));  % get multiple solutions into an 3D array
-%         imwrite(results_img, results_img_file2, 'jpg');  % write the image to the file
-%     else
-%         disp('No result.');
-%     end
+    counter2 = 1;
+    counter3 = 1;
+    extract_first_objects(img_filename, output_dir, img, num_sups, sup_image, image_data, original_mask, edge_thresh, counter,counter2,counter3);
     
