@@ -1,6 +1,5 @@
 % Main function for finding closure in images:
-function ClosureMain(img_filename, output_dir, num_sups, edge_thresh, sup_algorithm)
-%%  Arguments:
+%   Arguments:
 %   img_filename    - filename of the image to process (any format readable
 %                     by Matlab
 %   output_dir      - the output directory for the solutions
@@ -14,6 +13,8 @@ function ClosureMain(img_filename, output_dir, num_sups, edge_thresh, sup_algori
 %            using the Turbopixels method, use an edge threshold of 0.05,
 %            generate at most 10 solutions and will store them in the
 %            current directory.
+
+function ClosureMain(img_filename, output_dir, num_sups, edge_thresh, sup_algorithm)
     %% setup files
     core_name = img_filename(1:end-4);
     if (~exist(core_name,'dir'))

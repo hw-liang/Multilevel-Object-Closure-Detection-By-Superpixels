@@ -1,9 +1,10 @@
 % The function will extract all objects at first level.
-function [] = extract_first_objects(img_filename, output_dir, img, num_sups, sup_image, image_data, ...
-    mask, edge_thresh, counter,counter2, counter3)
 % The input will be the original image, mask(mask the area of interest as 0), and the tree node.
 % The output will be all the masks saved to files.
 % The function will also build a tree structure for the relationships.
+
+function [] = extract_first_objects(img_filename, output_dir, img, num_sups, sup_image, image_data, ...
+    mask, edge_thresh, counter,counter2, counter3)
     counter3 = 1;
     disp(['extract_objects is called with the counter', num2str(counter)]);
     

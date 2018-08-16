@@ -1,9 +1,7 @@
 General info:
 -------------
 
-This is the code for the CSC2523 course project, by Hanwen LIANG and Han Meng, winter 2018 at University of Toronto. We intend to use the work of “Optimal Contour Closure by Superpixel Grouping", Alex Levinshtein, Cristian Sminchisescu, Sven Dickinson. ECCV 2010” as the starting point to design an recursive algorithm to detect all possible objects and their closures for an image.
-
-The tree structure has been completed.
+This is the code for the CSC2523 course project, by Hanwen LIANG and Han Meng, winter 2018 at University of Toronto. We intend to use the work of “Optimal Contour Closure by Superpixel Grouping", Alex Levinshtein, Cristian Sminchisescu, Sven Dickinson. ECCV 2010” as the starting point to design an recursive algorithm to detect all possible objects and their closures for an image. Now the tree structure has been completed.
 
 We offer sincere thanks for Professor Sven Dickinson and Alex Levinshtein for their guidance and help in this project!
 

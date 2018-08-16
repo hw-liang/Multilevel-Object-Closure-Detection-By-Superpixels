@@ -11,7 +11,7 @@ function [result_masks] = find_objects_same_level(img_filename, output_dir, img,
     disp(['find_objects_same_level is called with the counter', num2str(counter)]);
     objects_same_level = [];
     [selected_labels, a_mask] = find_an_object(img_filename, img, sup_image, image_data, mask, edge_thresh);
-                                % Mask the area of insterest as 0
+    % Mask the area of insterest as 0
     objects_same_level = [objects_same_level, a_mask];
     object_size = sum(~mask(:)) - sum(a_mask(:));
 
@@ -37,7 +37,8 @@ function [result_masks] = find_objects_same_level(img_filename, output_dir, img,
     [a,b] = size(sup_image);
     s = n/b  % The number of found objects.
     Xs = zeros(max(sup_image(:)), s); % to hold all objects' labels for the original sup_image.
-    results_img_file2 = [output_dir,'/',core_name,'/',name,'_', num2str(counter),'_',num2str(counter3),'_',num2str(counter2), '_multiplesolutions.jpg'];  % the file name to hold multiple solutions
+    results_img_file2 = [output_dir,'/',core_name,'/',name,'_', num2str(counter),'_',num2str(counter3),'_',num2str(counter2), '_multiplesolutions.jpg'];  
+    % the file name to hold multiple solutions
 
     for sol = 1:s
         % For each solution, write the foreground (white and black) to an
