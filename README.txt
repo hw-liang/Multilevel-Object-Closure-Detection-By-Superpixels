@@ -56,5 +56,4 @@ current directory. This example uses 100 superpixels, returns at most 10 solutio
 of 0.05. The turbopixels method will be used to generate superpixels.
 
 This will generate airplane_solution_???.jpg files, where each one contains a binary mask for one closure hypothesis.
-The solutions are ordered by increasing closure cost.
-We also generate airplane_multiplesolutions.jpg file the visualizes all the solutions in one image.
+The solutions are ordered by increasing closure cost. We also generate airplane_multiplesolutions.jpg file the visualizes all the solutions in one image.
