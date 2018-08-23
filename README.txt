@@ -42,6 +42,8 @@ globalPb, the superpixels won't be recomputed since the old superpixels are alre
 2) The by default the code uses Pb and not globalPb to compute contours.
 globalPb can be used by setting the use_gpb = true flag. We provide a compiled version of globalPb for Matlab 7.8
 for 32 and 64 bit Linux. For a different platform the user will need to compile the globalPb code manually and put it under the globalPb directory. The code can be downloaded from : http://www.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/
+
+3) For the mainfunction ./Multilevel-Object-Closure-Detection-By-Superpixels/ClosureMain.m, we generate name-specific file automatically to store related files. And we use "XXX_num1_num2_num3_multisolutions.jpg"(num1.2.3) to represent the hierarchy of images.
  
 Example:
 --------

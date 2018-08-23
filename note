@@ -1,8 +1,0 @@
-This programm can be run on Matlab_2014/2017 or identical versions.
-
-Compared with the original source, we made some changes below:
-
-1. For the mainfunction ./Multilevel-Object-Closure-Detection-By-Superpixels/ClosureMain.m, we generate name-specific file automatically to store related files.
-2. At the stage of computing superpixels:
-    For "ncuts" method, we changed the ./Multilevel-Object-Closure-Detection-By-Superpixels/Ncut_9/eigs_new.m with the eigs.m from Matlab_2014.
-3. We changed /Multilevel-Object-Closure-Detection-By-Superpixels/ChooseLargestSupComponent.m to solve some bugs in special cases when we choose all the superpixels.
